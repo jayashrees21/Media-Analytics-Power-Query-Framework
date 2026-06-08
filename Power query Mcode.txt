@@ -1,0 +1,22 @@
+let
+    Source = Folder.Files("C:\Users\Jayashree S\Downloads\Media Analytics Dataset"),
+    #"Filtered Hidden Files1" = Table.SelectRows(Source, each [Attributes]?[Hidden]? <> true),
+    #"Invoke Custom Function1" = Table.AddColumn(#"Filtered Hidden Files1", "Transform File", each #"Transform File"([Content])),
+    #"Renamed Columns1" = Table.RenameColumns(#"Invoke Custom Function1", {"Name", "Source.Name"}),
+    #"Removed Other Columns1" = Table.SelectColumns(#"Renamed Columns1", {"Source.Name", "Transform File"}),
+    #"Expanded Table Column1" = Table.ExpandTableColumn(#"Removed Other Columns1", "Transform File", Table.ColumnNames(#"Transform File"(#"Sample File"))),
+    #"Changed Type" = Table.TransformColumnTypes(#"Expanded Table Column1",{{"Source.Name", type text}, {"Content_ID", type text}, {"Title", type text}, {"Genre", type text}, {"Views", Int64.Type}, {"Revenue", Int64.Type}, {"Report_Date", type date}, {"Country", type text}, {"Language", type text}, {"Asset_Type", type text}}),
+    #"Split Column by Delimiter" = Table.SplitColumn(#"Changed Type", "Source.Name", Splitter.SplitTextByEachDelimiter({"_"}, QuoteStyle.Csv, false), {"Source.Name.1", "Source.Name.2"}),
+    #"Changed Type1" = Table.TransformColumnTypes(#"Split Column by Delimiter",{{"Source.Name.1", type text}, {"Source.Name.2", type text}}),
+    #"Removed Columns" = Table.RemoveColumns(#"Changed Type1",{"Source.Name.2"}),
+    #"Reordered Columns" = Table.ReorderColumns(#"Removed Columns",{"Source.Name.1", "Report_Date", "Content_ID", "Title", "Genre", "Views", "Revenue", "Country", "Language", "Asset_Type"}),
+    #"Renamed Columns" = Table.RenameColumns(#"Reordered Columns",{{"Source.Name.1", "Platform"}}),
+    #"Changed Type2" = Table.TransformColumnTypes(#"Renamed Columns",{{"Revenue", Currency.Type}}),
+    #"Reordered Columns1" = Table.ReorderColumns(#"Changed Type2",{"Platform", "Report_Date", "Content_ID", "Title", "Genre", "Country", "Language", "Asset_Type", "Views", "Revenue"}),
+    #"Removed Duplicates" = Table.Distinct(#"Reordered Columns1"),
+    #"Added Custom" = Table.AddColumn(#"Removed Duplicates", "Data Quality Status", each if [Revenue] = null and [Views] = null then "Missing Revenue & Views"
+else if [Revenue] = null then "Missing Revenue"
+else if [Views] = null then "Missing Views"
+else "Valid")
+in
+    #"Added Custom"
