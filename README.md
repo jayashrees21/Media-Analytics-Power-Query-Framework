@@ -209,7 +209,6 @@ Reporting-Ready Dataset
 | README.md                 | Project documentation and implementation overview                          |
 | PowerQuery_M_Code.txt     | Power Query M code used for data ingestion, transformation, and validation |
 | Before_Transformation.png | Raw dataset before applying transformation logic                           |
-| DQ_Validation.png         | Data quality validation logic and DQ_Status implementation                 |
 | Final_Output.png          | Final consolidated analytics-ready dataset                                 |
 
 ---
